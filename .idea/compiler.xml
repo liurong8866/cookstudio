@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="CookStudio" />
+        <module name="cook-passport" />
+        <module name="cook-service" />
+        <module name="cook-order" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="cook-order" target="1.8" />
+      <module name="cook-passport" target="1.8" />
+      <module name="cook-service" target="1.8" />
+      <module name="CookStudio" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="CookStudio" options="-parameters" />
+      <module name="cook-order" options="-parameters" />
+      <module name="cook-passport" options="-parameters" />
+      <module name="cook-service" options="-parameters" />
+    </option>
+  </component>
+</project>

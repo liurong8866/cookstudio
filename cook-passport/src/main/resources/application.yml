@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+dubbo:
+  application:
+    name: passport
+  registry:
+    address: zookeeper://192.168.0.120:2181
+    timeout: 6000
+  metadata-report:
+    address: zookeeper://192.168.0.120:2181
+  protocol:
+    name: dubbo
+    port: 20880
+  scan:
+    base-packages: com.cook.passport.service

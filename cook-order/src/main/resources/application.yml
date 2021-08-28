@@ -1,0 +1,173 @@
+server:
+  port: 8081
+  servlet:
+    context-path:
+    encoding:
+      enabled: true
+      charset: UTF-8
+      force: true
+
+dubbo:
+  application:
+    name: order
+  registry:
+    address: zookeeper://192.168.0.120:2181
+
+spring:
+  application:
+    name: cook-order
+  main:
+    allow-bean-definition-overriding: true
+
+  shardingsphere:
+    datasource:
+      names: cook-order-01,cook-order-02
+      cook-order-01:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://192.168.0.120/cook-order-01?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        username: root
+        password: 123456
+#      slave-cook-order-01:
+#        type: com.alibaba.druid.pool.DruidDataSource
+#        driverClassName: com.mysql.cj.jdbc.Driver
+#        url: jdbc:mysql://192.168.0.121/cook-order-01?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+#        username: root
+#        password: 123456
+
+      cook-order-02:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://192.168.0.120/cook-order-02?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        username: root
+        password: 123456
+#      slave-cook-order-02:
+#        type: com.alibaba.druid.pool.DruidDataSource
+#        driverClassName: com.mysql.cj.jdbc.Driver
+#        url: jdbc:mysql://192.168.0.121/cook-order-02?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+#        username: root
+#        password: 123456
+
+        #        maxActive: 20
+        #        initialSize: 5
+        #        maxWait: 60000
+        #        minIdle: 5
+        #        timeBetweenEvictionRunsMillis: 60000
+        #        minEvictableIdleTimeMillis: 300000
+        #        validationQuery: SELECT 1 FROM DUAL
+        #        testWhileIdle: true
+        #        testOnBorrow: false
+        #        testOnReturn: false
+        #        #是否缓存preparedStatement，也就是PSCache。在mysql下建议关闭。 PSCache对支持游标的数据库性能提升巨大，比如说oracle。
+        #        poolPreparedStatements: false
+        #        #要启用PSCache，-1为关闭 必须配置大于0，当大于0时，poolPreparedStatements自动触发修改为true  可以把这个数值配置大一些，比如说100
+        #        maxOpenPreparedStatements: -1
+        #        #配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+        #        filters: stat,wall,log4j2
+        #        #通过connectProperties属性来打开mergeSql功能；慢SQL记录
+        #        connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+        #        #合并多个DruidDataSource的监控数据
+        #        useGlobalDataSourceStat: true
+        #        loginUsername: druid
+        #        loginPassword: druid
+
+  # 设置绑定表
+    sharding:
+      # 主从数据库
+#      master-slave-rules:
+#        ms-cook-order-01:
+#          master-data-source-name: cook-order-01
+#          slave-data-source-name: slave-cook-order-01
+#        ms-cook-order-02:
+#          master-data-source-name: cook-order-02
+#          slave-data-source-name: slave-cook-order-02
+
+      # default-data-source-name: cook-order-01
+      #需要拆分的表，可以设置多个  在 li_order 级别即可
+      tables:
+        #需要进行分表的逻辑表名
+        cook_order:
+          # 分库
+          database-strategy:
+            inline:
+              sharding-column: user_id
+              algorithm-expression: cook-order-0$->{user_id % 2 + 1}
+
+          # 分片算法
+          table-strategy:
+            inline:
+              sharding-column: order_id
+              algorithm-expression: cook_order_0$->{order_id % 2 + 1}
+
+          #实际的表结点,下面代表的是li_order_为开头的所有表，如果能确定表的范围例如按月份分表，这里的写法是data2020.li_order_$->{2020..2021}_$->{01..12}  表示例如 li_order_2020_01 li_order_2020_03 li_order_2021_01
+          # actual-data-nodes: data2020.li_order_$->{2019..2021}_$->{01..12}
+          # actual-data-nodes: cook-order-$->{01}.cook_order_$->{01..02}  如果路由不完全，会报错：Error updating database.  Cause: java.lang.IllegalStateException: no database route info
+          # actual-data-nodes: cook-order-01.cook_order_01
+
+          # 非读写分离
+          actual-data-nodes: cook-order-0$->{1..2}.cook_order_0$->{1..2}
+          # 读写分离
+#          actual-data-nodes: ms-cook-order-0$->{1..2}.cook_order_0$->{1..2}
+
+          # 指定order表的主键生成策略 雪花算法：SnowFlake
+          key-generator:
+            column: order_id
+            type: SNOWFLAKE
+
+        # 第二张表
+        cook_order_item:
+
+          # 分库
+          database-strategy:
+            inline:
+              sharding-column: user_id
+#              algorithm-expression: cook-order-0$->{user_id % 2 + 1}
+              algorithm-expression: cook-order-0$->{user_id % 2 + 1}
+
+          # 分片算法
+          table-strategy:
+            inline:
+              sharding-column: order_id
+              algorithm-expression: cook_order_item_0$->{order_id % 2 + 1}
+
+          #实际的表结点
+          # 非读写分离
+          actual-data-nodes: cook-order-0$->{1..2}.cook_order_item_0$->{1..2}
+          # 读写分离
+#          actual-data-nodes: ms-cook-order-0$->{1..2}.cook_order_item_0$->{1..2}
+
+          # 指定order表的主键生成策略 雪花算法：SnowFlake
+          key-generator:
+            column: order_item_id
+            type: SNOWFLAKE
+
+      binding-tables:
+        - cook_order, cook_order_item
+      broadcast-tables:
+        - cook_user_info
+
+    props:
+      #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭
+      sql:
+        show: true
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  # 发现实体类
+  type-aliases-package: com.cook.order.**
+  # 发现mapper.xml
+  mapper-locations: classpath*:mapper/*Mapper.xml
+
+#mybatis-plus:
+#  configuration:
+#    map-underscore-to-camel-case: true
+
+# 日志
+logging:
+  # 输出级别
+  level:
+    com.cook: info
+    #    org.hibernate: debug
+    #    org.springframework: debug
+    #    org.springframework.data.mongodb.core: debug

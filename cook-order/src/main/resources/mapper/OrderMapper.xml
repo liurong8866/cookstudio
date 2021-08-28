@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cook.order.mapper.OrderMapper">
+    <resultMap type="com.cook.order.model.OrderInfo" id="OrderInfoResult">
+        <id property="orderId" column="order_id" />
+        <result property="price" column="price" />
+        <result property="quantity" column="quantity" />
+        <result property="total" column="total" />
+        <result property="userId" column="user_id" />
+        <result property="status" column="status" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <resultMap type="com.cook.order.dto.OrderInfoData" id="OrderInfoDataResult" extends="OrderInfoResult">
+        <result property="userName" column="user_name" />
+        <association property="userInfo" javaType="com.cook.model.UserInfo">
+            <id property="userId" column="user_id"/>
+            <result property="userName" column="user_name" />
+            <result property="userAge" column="user_age" />
+            <result property="userSex" column="user_sex" />
+        </association>
+        <collection property="orderItemInfo" ofType="com.cook.order.model.OrderItemInfo">
+            <id property="orderItemId" column="order_item_id" />
+            <result property="productId" column="product_id" />
+        </collection>
+    </resultMap>
+
+    <sql id="selectOrderInfo">
+        SELECT order_id,price,quantity,total,user_id,status,create_time,update_time FROM cook_order
+    </sql>
+
+    <select id="query" parameterType="OrderInfo" resultMap="OrderInfoResult">
+        <include refid="selectOrderInfo" />
+        <where>
+            <if test="orderId != null and orderId != ''">and order_id=#{orderId}</if>
+            <if test="price != null and price != ''">and price=#{price}</if>
+            <if test="quantity != null and quantity != ''">and quantity=#{quantity}</if>
+            <if test="total != null and total != ''">and total=#{total}</if>
+            <if test="userId != null and userId != ''">and user_id=#{userId}</if>
+            <if test="status != null and status != ''">and user_id=#{status}</if>
+            <if test="createTime != null">and create_time=#{createTime}</if>
+            <if test="updateTime != null">and update_time=#{updateTime}</if>
+        </where>
+    </select>
+
+    <select id="queryByOrderId" parameterType="Integer" resultMap="OrderInfoResult">
+        <include refid="selectOrderInfo" />
+        <where>
+            and order_id=#{orderId}
+        </where>
+    </select>
+
+    <select id="queryOrderAndItem" parameterType="com.cook.order.dto.OrderInfoData" resultMap="OrderInfoDataResult">
+
+        SELECT A.order_id, A.price, A.quantity, A.total, A.user_id, A.status, A.create_time, A.update_time, B.user_name, B.user_age, B.user_sex, C.order_item_id, C.product_id
+        FROM cook_order A
+        join cook_user_info B on A.user_id = B.user_id
+        join cook_order_item C on A.order_id = C.order_id
+        <where>
+            <if test="orderId != null and orderId != ''">and A.order_id = #{orderId}</if>
+        </where>
+
+    </select>
+
+    <insert id="insert" parameterType="OrderInfo" useGeneratedKeys="true" keyProperty="orderId">
+        insert into cook_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null and orderId != ''">order_id,</if>
+            <if test="price != null and price != ''">price,</if>
+            <if test="quantity != null and quantity != ''">quantity,</if>
+            <if test="total != null and total != ''">total,</if>
+            <if test="userId != null and userId != ''">user_id,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null and orderId != ''">#{orderId},</if>
+            <if test="price != null and price != ''">#{price},</if>
+            <if test="quantity != null and quantity != ''">#{quantity},</if>
+            <if test="total != null and total != ''">#{total},</if>
+            <if test="userId != null and userId != ''">#{userId},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+
+</mapper>
+<!--        SELECT A.order_id, A.price, A.quantity, A.total, A.user_id, A.status, A.create_time, A.update_time, B.user_name, B.user_age, B.user_sex-->
+<!--        FROM cook_order A-->
+<!--        join cook_user_info B on A.user_id = B.user_id-->
+
+<!--        &#45;&#45;         SELECT A.order_id, A.price, A.quantity, A.total, A.user_id, A.status, A.create_time, A.update_time, C.order_item_id, C.product_id-->
+<!--        &#45;&#45;         FROM cook_order A-->
+<!--        &#45;&#45;         join cook_order_item C on A.order_id = C.order_id-->
