@@ -21,32 +21,31 @@ spring:
 
   shardingsphere:
     datasource:
-      names: cook-order-01,cook-order-02
+      names: cook-order-01,cook-order-02,slave-cook-order-01,slave-cook-order-02
       cook-order-01:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
         url: jdbc:mysql://192.168.0.120/cook-order-01?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
         password: 123456
-#      slave-cook-order-01:
-#        type: com.alibaba.druid.pool.DruidDataSource
-#        driverClassName: com.mysql.cj.jdbc.Driver
-#        url: jdbc:mysql://192.168.0.121/cook-order-01?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-#        username: root
-#        password: 123456
-
+      slave-cook-order-01:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://192.168.0.121/cook-order-01?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        username: root
+        password: 123456
       cook-order-02:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
         url: jdbc:mysql://192.168.0.120/cook-order-02?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
         password: 123456
-#      slave-cook-order-02:
-#        type: com.alibaba.druid.pool.DruidDataSource
-#        driverClassName: com.mysql.cj.jdbc.Driver
-#        url: jdbc:mysql://192.168.0.121/cook-order-02?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-#        username: root
-#        password: 123456
+      slave-cook-order-02:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://192.168.0.121/cook-order-02?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        username: root
+        password: 123456
 
         #        maxActive: 20
         #        initialSize: 5
@@ -73,17 +72,22 @@ spring:
 
   # 设置绑定表
     sharding:
-      # 主从数据库
-#      master-slave-rules:
-#        ms-cook-order-01:
-#          master-data-source-name: cook-order-01
-#          slave-data-source-name: slave-cook-order-01
-#        ms-cook-order-02:
-#          master-data-source-name: cook-order-02
-#          slave-data-source-name: slave-cook-order-02
 
-      # default-data-source-name: cook-order-01
-      #需要拆分的表，可以设置多个  在 li_order 级别即可
+      # 主从数据库
+      master-slave-rules:
+        ms-cook-order-01:
+          master-data-source-name: cook-order-01
+          slave-data-source-names: #注意这里是 names，被坑了
+            - slave-cook-order-01
+          loadBalanceAlgorithmType: ROUND_ROBIN # 如果多个slave，可以设置负载均衡模式
+
+        ms-cook-order-02:
+          master-data-source-name: cook-order-02
+          slave-data-source-names:
+            - slave-cook-order-02
+          loadBalanceAlgorithmType: ROUND_ROBIN
+
+      #需要拆分的表，可以设置多个
       tables:
         #需要进行分表的逻辑表名
         cook_order:
@@ -91,7 +95,8 @@ spring:
           database-strategy:
             inline:
               sharding-column: user_id
-              algorithm-expression: cook-order-0$->{user_id % 2 + 1}
+#              algorithm-expression: cook-order-0$->{user_id % 2 + 1}
+              algorithm-expression: ms-cook-order-0$->{user_id % 2 + 1}
 
           # 分片算法
           table-strategy:
@@ -99,15 +104,15 @@ spring:
               sharding-column: order_id
               algorithm-expression: cook_order_0$->{order_id % 2 + 1}
 
-          #实际的表结点,下面代表的是li_order_为开头的所有表，如果能确定表的范围例如按月份分表，这里的写法是data2020.li_order_$->{2020..2021}_$->{01..12}  表示例如 li_order_2020_01 li_order_2020_03 li_order_2021_01
-          # actual-data-nodes: data2020.li_order_$->{2019..2021}_$->{01..12}
-          # actual-data-nodes: cook-order-$->{01}.cook_order_$->{01..02}  如果路由不完全，会报错：Error updating database.  Cause: java.lang.IllegalStateException: no database route info
+          #实际的表结点。  下面代表的是cook_order_为开头的所有表，如果能确定表的范围例如按月份分表，这里的写法是data2020.cook_order_$->{2020..2021}_$->{01..12}  表示例如 cook_order_2020_01 cook_order_2020_03 cook_order_2021_01
+          # actual-data-nodes: data2020.cook_order_$->{2019..2021}_$->{01..12}
+          # actual-data-nodes: cook-order-$->{01}.cook_order_$->{01..02}  如果路由匹配不完全，会报错：Error updating database.  Cause: java.lang.IllegalStateException: no database route info
           # actual-data-nodes: cook-order-01.cook_order_01
 
           # 非读写分离
-          actual-data-nodes: cook-order-0$->{1..2}.cook_order_0$->{1..2}
+          # actual-data-nodes: cook-order-0$->{1..2}.cook_order_0$->{1..2}
           # 读写分离
-#          actual-data-nodes: ms-cook-order-0$->{1..2}.cook_order_0$->{1..2}
+          actual-data-nodes: ms-cook-order-0$->{1..2}.cook_order_0$->{1..2}
 
           # 指定order表的主键生成策略 雪花算法：SnowFlake
           key-generator:
@@ -121,8 +126,10 @@ spring:
           database-strategy:
             inline:
               sharding-column: user_id
-#              algorithm-expression: cook-order-0$->{user_id % 2 + 1}
-              algorithm-expression: cook-order-0$->{user_id % 2 + 1}
+              # 非读写分离
+              # algorithm-expression: cook-order-0$->{user_id % 2 + 1}
+              # 读写分离
+              algorithm-expression: ms-cook-order-0$->{user_id % 2 + 1}
 
           # 分片算法
           table-strategy:
@@ -132,9 +139,9 @@ spring:
 
           #实际的表结点
           # 非读写分离
-          actual-data-nodes: cook-order-0$->{1..2}.cook_order_item_0$->{1..2}
+          #actual-data-nodes: cook-order-0$->{1..2}.cook_order_item_0$->{1..2}
           # 读写分离
-#          actual-data-nodes: ms-cook-order-0$->{1..2}.cook_order_item_0$->{1..2}
+          actual-data-nodes: ms-cook-order-0$->{1..2}.cook_order_item_0$->{1..2}
 
           # 指定order表的主键生成策略 雪花算法：SnowFlake
           key-generator:
@@ -151,6 +158,21 @@ spring:
       sql:
         show: true
 
+    encrypt:
+      encryptors:
+        encryptor_aes:
+          type=aes:
+            spring.shardingsphere.encrypt.encryptors.encryptor_aes.props.aes.key.value=123456
+  spring.shardingsphere.encrypt.encryptors.encryptor_aes.type=aes
+  spring.shardingsphere.encrypt.encryptors.encryptor_aes.props.aes.key.value=123456
+
+  spring.shardingsphere.encrypt.tables.app_auth_register.columns.user_id.plainColumn=app_id
+  spring.shardingsphere.encrypt.tables.app_auth_register.columns.user_id.cipherColumn=client_id
+  #spring.shardingsphere.encrypt.tables.book_shelf.columns.user_id.assistedQueryColumn=user_assisted
+  spring.shardingsphere.encrypt.tables.app_auth_register.columns.user_id.encryptor=encryptor_aes
+  ————————————————
+  版权声明：本文为CSDN博主「pl在之心」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+  原文链接：https://blog.csdn.net/u010627840/article/details/103671158
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
