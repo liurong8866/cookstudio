@@ -158,21 +158,6 @@ spring:
       sql:
         show: true
 
-    encrypt:
-      encryptors:
-        encryptor_aes:
-          type=aes:
-            spring.shardingsphere.encrypt.encryptors.encryptor_aes.props.aes.key.value=123456
-  spring.shardingsphere.encrypt.encryptors.encryptor_aes.type=aes
-  spring.shardingsphere.encrypt.encryptors.encryptor_aes.props.aes.key.value=123456
-
-  spring.shardingsphere.encrypt.tables.app_auth_register.columns.user_id.plainColumn=app_id
-  spring.shardingsphere.encrypt.tables.app_auth_register.columns.user_id.cipherColumn=client_id
-  #spring.shardingsphere.encrypt.tables.book_shelf.columns.user_id.assistedQueryColumn=user_assisted
-  spring.shardingsphere.encrypt.tables.app_auth_register.columns.user_id.encryptor=encryptor_aes
-  ————————————————
-  版权声明：本文为CSDN博主「pl在之心」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
-  原文链接：https://blog.csdn.net/u010627840/article/details/103671158
 mybatis:
   configuration:
     map-underscore-to-camel-case: true

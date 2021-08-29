@@ -61,6 +61,7 @@
         join cook_user_info B on A.user_id = B.user_id
         join cook_order_item C on A.order_id = C.order_id
         <where>
+            <if test="userId != null and userId != ''">and A.user_id = #{userId}</if>
             <if test="orderId != null and orderId != ''">and A.order_id = #{orderId}</if>
         </where>
 

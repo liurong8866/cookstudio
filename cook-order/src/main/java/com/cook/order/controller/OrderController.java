@@ -5,11 +5,15 @@ import com.cook.order.service.OrderService;
 import com.cook.service.LoginService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 @RestController
@@ -42,17 +46,17 @@ public class OrderController {
     }
 
     @GetMapping("/all")
-    public List<OrderInfo> getAllInfo(){
-        OrderInfo orderInfo = new OrderInfo();
-        List<OrderInfo> list= orderService.queryOrderAndItem(orderInfo);
+    public List<OrderInfo> getAllInfo(@RequestParam Map<String, Object> map){
+//    public List<OrderInfo> getAllInfo(@RequestParam(required = false) Map<String, String> map){
 
-        return list;
-    }
+//        Long orderId = map.containsKey("orderId") ? Long.valueOf(map.get("orderId")) : null;
+//        Long userId = map.containsKey("userId") ? Long.valueOf(map.get("userId")) : null;
+        Long orderId =Long.valueOf(map.get("orderId").toString()) ;
+        Long userId = Long.valueOf(map.get("userId").toString());
 
-    @GetMapping("/all/{id}")
-    public List<OrderInfo> getAllInfo(@PathVariable("id") Long orderId){
         OrderInfo orderInfo = new OrderInfo();
         orderInfo.setOrderId(orderId);
+        orderInfo.setUserId(userId);
         List<OrderInfo> list= orderService.queryOrderAndItem(orderInfo);
 
         return list;
@@ -64,7 +68,7 @@ public class OrderController {
                 .setPrice(BigDecimal.valueOf(10.0))
                 .setQuantity(2)
                 .setTotal(BigDecimal.valueOf(20.0))
-                .setUserId(1L)
+                .setUserId(2L)
                 .setStatus((short) 1)
                 .setCreateTime(new Date());
 
