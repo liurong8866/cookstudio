@@ -7,6 +7,7 @@
         <option value="$PROJECT_DIR$/cook-passport/pom.xml" />
         <option value="$PROJECT_DIR$/cook-service/pom.xml" />
         <option value="$PROJECT_DIR$/cook-order/pom.xml" />
+        <option value="$PROJECT_DIR$/cook-redis/pom.xml" />
       </list>
     </option>
   </component>

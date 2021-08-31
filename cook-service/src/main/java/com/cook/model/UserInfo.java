@@ -1,6 +1,8 @@
 package com.cook.model;
 
-public class UserInfo {
+import java.io.Serializable;
+
+public class UserInfo implements Serializable {
 
     private Long userId;
     private String userName;

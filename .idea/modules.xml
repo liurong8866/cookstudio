@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/CookStudio.iml" filepath="$PROJECT_DIR$/CookStudio.iml" />
       <module fileurl="file://$PROJECT_DIR$/cook-order/cook-order.iml" filepath="$PROJECT_DIR$/cook-order/cook-order.iml" />
       <module fileurl="file://$PROJECT_DIR$/cook-passport/cook-passport.iml" filepath="$PROJECT_DIR$/cook-passport/cook-passport.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cook-redis/cook-redis.iml" filepath="$PROJECT_DIR$/cook-redis/cook-redis.iml" />
       <module fileurl="file://$PROJECT_DIR$/cook-service/cook-service.iml" filepath="$PROJECT_DIR$/cook-service/cook-service.iml" />
     </modules>
   </component>

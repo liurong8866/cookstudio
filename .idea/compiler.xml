@@ -11,11 +11,13 @@
         <module name="cook-passport" />
         <module name="cook-service" />
         <module name="cook-order" />
+        <module name="cook-redis" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="cook-order" target="1.8" />
       <module name="cook-passport" target="1.8" />
+      <module name="cook-redis" target="1.8" />
       <module name="cook-service" target="1.8" />
       <module name="CookStudio" target="1.8" />
     </bytecodeTargetLevel>
@@ -25,6 +27,7 @@
       <module name="CookStudio" options="-parameters" />
       <module name="cook-order" options="-parameters" />
       <module name="cook-passport" options="-parameters" />
+      <module name="cook-redis" options="-parameters" />
       <module name="cook-service" options="-parameters" />
     </option>
   </component>

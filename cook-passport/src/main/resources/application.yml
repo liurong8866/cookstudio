@@ -14,3 +14,23 @@ dubbo:
     port: 20880
   scan:
     base-packages: com.cook.passport.service
+
+spring:
+  redis:
+#    host: 192.168.0.120
+#    port: 6379
+#    # 数据库索引
+#    database: 0
+    # 密码
+    password:
+    sentinel:
+      master: myredis
+      nodes: 192.168.0.120:26379,192.168.0.121:26379  # 哨兵的IP:Port列表
+    timeout: 6000
+    lettuce:
+      pool:
+        max-idle: 8
+        max-active: 20
+        min-idle: 5
+        max-wait: 10000ms
+

@@ -2,19 +2,13 @@ package com.cook.order.controller;
 
 import com.cook.order.model.OrderInfo;
 import com.cook.order.service.OrderService;
-import com.cook.service.LoginService;
-import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
-import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 @RestController
 @RequestMapping("/order")
@@ -22,17 +16,6 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
-
-    @Reference(version = "1.0")
-    private LoginService loginService;
-
-    @GetMapping("/login")
-    @ResponseBody
-    public String login(){
-
-        String login = loginService.login();
-        return login;
-    }
 
     @GetMapping
     public List<OrderInfo> index(){
